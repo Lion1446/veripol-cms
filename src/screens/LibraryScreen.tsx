@@ -1,16 +1,11 @@
+// LibraryScreen.tsx
 import { Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchBar from "../components/SearchBar";
-import {
-	useState,
-	ChangeEvent,
-	useEffect,
-	ReactElement,
-	useContext,
-} from "react";
+import { useState, ChangeEvent, useEffect, ReactElement } from "react";
 import { Book } from "../models/Book";
 import { getBooksByAuthor } from "../services/books";
-import { UserContext } from "../contexts/UserContext";
+import { useUserStore } from "../stores/UserStore";
 import "./style.css";
 import DataTable from "../components/Table";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +15,9 @@ const LibraryScreen = (): ReactElement => {
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	const [books, setBooks] = useState<Book[]>([]);
 
-	const { user } = useContext(UserContext);
+	const { user } = useUserStore((state) => ({
+		user: state.user,
+	}));
 
 	const handleSearchOnChange = (event: ChangeEvent<HTMLInputElement>) => {
 		setSearchTerm(event.target.value);

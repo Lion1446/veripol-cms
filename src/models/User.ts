@@ -81,8 +81,6 @@ export class User extends BaseModel implements IUser {
 			return null;
 		}
 
-		console.log(data);
-
 		return User.fromJson(data.user);
 	}
 }

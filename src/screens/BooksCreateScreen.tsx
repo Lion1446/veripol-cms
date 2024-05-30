@@ -7,14 +7,14 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { Book } from "../models/Book"; // Adjust the import path as per your project structure
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UserContext } from "../contexts/UserContext";
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
+import { useUserStore } from "../stores/UserStore";
 
 // Define Book validation schema using Zod
 const bookSchema = z.object({
@@ -32,7 +32,9 @@ type BookFormValues = z.infer<typeof bookSchema>;
 
 const BooksCreateScreen = () => {
 	const navigate = useNavigate();
-	const { user } = useContext(UserContext);
+	const { user } = useUserStore((state) => ({
+		user: state.user,
+	}));
 	const [creating, setCreating] = useState(false);
 
 	const {

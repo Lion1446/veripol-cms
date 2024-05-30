@@ -1,9 +1,12 @@
+// MainLayout.tsx
 import { Outlet, Navigate } from "react-router-dom";
-import { useUser } from "../contexts/UserContext";
 import SideDrawer from "../components/SideDrawer";
+import { useUserStore } from "../stores/UserStore";
 
 const MainLayout = () => {
-	const { user } = useUser();
+	const { user } = useUserStore((state) => ({
+		user: state.user,
+	}));
 
 	if (!user) {
 		return <Navigate to='/' replace />;

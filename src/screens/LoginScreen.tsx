@@ -13,7 +13,7 @@ import {
 import { User } from "../models/User"; // Ensure the import path is correct
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../contexts/UserContext";
+import { useUserStore } from "../stores/UserStore";
 
 const loginSchema = z.object({
 	email: z.string().email({ message: "Invalid email address" }),
@@ -25,8 +25,10 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const LoginScreen = () => {
+	const { setUser } = useUserStore((state) => ({
+		setUser: state.setUser,
+	}));
 	const navigate = useNavigate();
-	const { setUser } = useUser();
 	const {
 		register,
 		handleSubmit,
@@ -45,7 +47,7 @@ const LoginScreen = () => {
 			setErrorMessage(null); // Clear previous error messages
 			const user = await User.login(data.email, data.password);
 			if (user) {
-				setUser(user); // Set the user data in the context
+				setUser(user); // Set the user data in Zustand
 				navigate("/dashboard/books");
 			} else {
 				setErrorMessage("Invalid credentials");

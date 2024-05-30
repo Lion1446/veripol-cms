@@ -12,7 +12,6 @@ import {
 	CircularProgress,
 } from "@mui/material";
 import MainLayout from "./layouts/MainLayout";
-import { UserProvider } from "./contexts/UserContext";
 import BooksCreateScreen from "./screens/BooksCreateScreen";
 
 const LoginScreen = lazy(() => import("./screens/LoginScreen"));
@@ -32,42 +31,37 @@ function App() {
 	return (
 		<ThemeProvider theme={theme}>
 			<CssBaseline />
-			<UserProvider>
-				<Router>
-					<Suspense
-						fallback={
-							<div
-								style={{
-									display: "flex",
-									justifyContent: "center",
-									marginTop: "20%",
-								}}
-							>
-								<CircularProgress />
-							</div>
-						}
-					>
-						<Routes>
-							<Route index element={<LoginScreen />} />
-							<Route path='dashboard' element={<MainLayout />}>
-								<Route path='books' element={<MainLayout />}>
-									<Route index element={<LibraryScreen />} />
-									<Route path='create' element={<BooksCreateScreen />} />
-								</Route>
-								<Route path='courses' element={<CoursesScreen />} />
-								<Route
-									path='learning-paths'
-									element={<LearningPathsScreen />}
-								/>
-								<Route path='job-roles' element={<JobRolesScreen />} />
-								<Route path='skills' element={<SkillsScreen />} />
+			<Router>
+				<Suspense
+					fallback={
+						<div
+							style={{
+								display: "flex",
+								justifyContent: "center",
+								marginTop: "20%",
+							}}
+						>
+							<CircularProgress />
+						</div>
+					}
+				>
+					<Routes>
+						<Route index element={<LoginScreen />} />
+						<Route path='dashboard' element={<MainLayout />}>
+							<Route path='books' element={<MainLayout />}>
+								<Route index element={<LibraryScreen />} />
+								<Route path='create' element={<BooksCreateScreen />} />
 							</Route>
-							{/* Redirect any other unknown routes to LoginScreen */}
-							<Route path='*' element={<Navigate to='/' replace />} />
-						</Routes>
-					</Suspense>
-				</Router>
-			</UserProvider>
+							<Route path='courses' element={<CoursesScreen />} />
+							<Route path='learning-paths' element={<LearningPathsScreen />} />
+							<Route path='job-roles' element={<JobRolesScreen />} />
+							<Route path='skills' element={<SkillsScreen />} />
+						</Route>
+						{/* Redirect any other unknown routes to LoginScreen */}
+						<Route path='*' element={<Navigate to='/' replace />} />
+					</Routes>
+				</Suspense>
+			</Router>
 		</ThemeProvider>
 	);
 }

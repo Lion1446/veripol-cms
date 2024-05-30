@@ -17,12 +17,15 @@ import Typography from "@mui/material/Typography";
 import AltRouteSharpIcon from "@mui/icons-material/AltRouteSharp";
 import WorkSharpIcon from "@mui/icons-material/WorkSharp";
 import ConstructionSharpIcon from "@mui/icons-material/ConstructionSharp";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useNavigate } from "react-router-dom";
+import { useUserStore } from "../stores/UserStore";
 
 const drawerWidth = 240;
 
 const SideDrawer = () => {
 	const navigate = useNavigate();
+	const logOut = useUserStore((state) => state.logOut);
 	const [mobileOpen, setMobileOpen] = React.useState(false);
 	const [isClosing, setIsClosing] = React.useState(false);
 	const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
@@ -66,8 +69,13 @@ const SideDrawer = () => {
 		}
 	};
 
+	const handleLogout = () => {
+		logOut();
+		navigate("/");
+	};
+
 	const drawer = (
-		<div>
+		<div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
 			<Toolbar />
 			<List>
 				{["Library", "Courses", "Learning Paths", "Job Roles", "Skills"].map(
@@ -86,25 +94,25 @@ const SideDrawer = () => {
 								}}
 							>
 								<ListItemIcon>
-									{index == 0 ? (
+									{index === 0 ? (
 										<LibraryBooksSharpIcon
 											style={{
 												color: index === selectedTabIndex ? "white" : "black",
 											}}
 										/>
-									) : index == 1 ? (
+									) : index === 1 ? (
 										<LocalLibrarySharpIcon
 											style={{
 												color: index === selectedTabIndex ? "white" : "black",
 											}}
 										/>
-									) : index == 2 ? (
+									) : index === 2 ? (
 										<AltRouteSharpIcon
 											style={{
 												color: index === selectedTabIndex ? "white" : "black",
 											}}
 										/>
-									) : index == 3 ? (
+									) : index === 3 ? (
 										<WorkSharpIcon
 											style={{
 												color: index === selectedTabIndex ? "white" : "black",
@@ -123,6 +131,15 @@ const SideDrawer = () => {
 						</ListItem>
 					)
 				)}
+			</List>
+			<Box sx={{ flexGrow: 1 }} />
+			<List>
+				<ListItem button onClick={handleLogout}>
+					<ListItemIcon>
+						<ExitToAppIcon />
+					</ListItemIcon>
+					<ListItemText primary='Log out' />
+				</ListItem>
 			</List>
 		</div>
 	);
