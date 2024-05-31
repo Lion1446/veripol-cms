@@ -32,7 +32,7 @@ const DataTable = <T extends object>({ data }: DataTableProps<T>) => {
 	const rows = filteredData.map((row, index) => ({ id: index, ...row }));
 
 	return (
-		<div style={{ height: 400, width: "100%" }}>
+		<div style={{ height: "70vh", width: "100%" }}>
 			<DataGrid
 				rows={rows}
 				columns={columns}
