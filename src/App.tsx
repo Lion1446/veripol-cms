@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import MainLayout from "./layouts/MainLayout";
 import BooksCreateScreen from "./screens/BooksCreateScreen";
+import CoursesCreateScreen from "./screens/CoursesCreateScreen";
 
 const LoginScreen = lazy(() => import("./screens/LoginScreen"));
 const LibraryScreen = lazy(() => import("./screens/LibraryScreen"));
@@ -52,7 +53,10 @@ function App() {
 								<Route index element={<LibraryScreen />} />
 								<Route path='create' element={<BooksCreateScreen />} />
 							</Route>
-							<Route path='courses' element={<CoursesScreen />} />
+							<Route path='courses' element={<MainLayout />}>
+								<Route index element={<CoursesScreen />} />
+								<Route path='create' element={<CoursesCreateScreen />} />
+							</Route>
 							<Route path='learning-paths' element={<LearningPathsScreen />} />
 							<Route path='job-roles' element={<JobRolesScreen />} />
 							<Route path='skills' element={<SkillsScreen />} />

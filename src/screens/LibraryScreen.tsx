@@ -27,6 +27,7 @@ const LibraryScreen = (): ReactElement => {
 		const fetchBooks = async () => {
 			const authorID = user?.id ?? "";
 			const fetchedBooks = await getBooksByAuthor(authorID);
+			console.log(fetchedBooks);
 			setBooks(fetchedBooks);
 		};
 

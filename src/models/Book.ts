@@ -17,7 +17,7 @@ export class Book extends BaseModel implements IBook {
 	difficultyLevel: number;
 	authorID: string;
 	isPublished: boolean;
-	chapters: Chapter[];
+	// chapters: Chapter[];
 
 	constructor(data: IBook) {
 		super(data);
@@ -26,7 +26,7 @@ export class Book extends BaseModel implements IBook {
 		this.difficultyLevel = data.difficultyLevel;
 		this.authorID = data.authorID;
 		this.isPublished = data.isPublished;
-		this.chapters = [];
+		// this.chapters = [];
 	}
 
 	static fromJson(json: Record<string, any>): Book {
@@ -34,9 +34,9 @@ export class Book extends BaseModel implements IBook {
 			...BaseModel.fromJson(json),
 			title: json.title,
 			description: json.description,
-			difficultyLevel: json.difficultyLevel,
-			authorID: json.authorID,
-			isPublished: json.isPublished,
+			difficultyLevel: json.difficulty_level,
+			authorID: json.author_id,
+			isPublished: json.is_published,
 		});
 	}
 
