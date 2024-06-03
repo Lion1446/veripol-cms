@@ -44,10 +44,10 @@ const LoginScreen = () => {
 	const onSubmit: SubmitHandler<LoginFormValues> = async (data) => {
 		try {
 			setLoading(true);
-			setErrorMessage(null); // Clear previous error messages
+			setErrorMessage(null);
 			const user = await User.login(data.email, data.password);
 			if (user) {
-				setUser(user); // Set the user data in Zustand
+				setUser(user);
 				navigate("/dashboard/books");
 			} else {
 				setErrorMessage("Invalid credentials");
@@ -101,8 +101,8 @@ const LoginScreen = () => {
 					flexDirection: "column",
 					gap: "20px",
 					marginTop: "20px",
-					width: "100%", // Maximize width
-					maxWidth: "400px", // Adjust the maximum width as needed
+					width: "100%",
+					maxWidth: "400px",
 				}}
 			>
 				<TextField

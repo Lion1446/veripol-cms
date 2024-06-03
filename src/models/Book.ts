@@ -1,6 +1,4 @@
-// src/models/Book.ts
 import { BaseModel, IBaseModel } from "./BaseModel";
-import { Chapter } from "./Chapter";
 import { supabase } from "../supabaseClient";
 
 interface IBook extends IBaseModel {
@@ -17,7 +15,6 @@ export class Book extends BaseModel implements IBook {
 	difficultyLevel: number;
 	authorID: string;
 	isPublished: boolean;
-	// chapters: Chapter[];
 
 	constructor(data: IBook) {
 		super(data);
@@ -26,7 +23,6 @@ export class Book extends BaseModel implements IBook {
 		this.difficultyLevel = data.difficultyLevel;
 		this.authorID = data.authorID;
 		this.isPublished = data.isPublished;
-		// this.chapters = [];
 	}
 
 	static fromJson(json: Record<string, any>): Book {
@@ -64,6 +60,40 @@ export class Book extends BaseModel implements IBook {
 			}
 
 			this.id = data.id;
+			return true;
+		} catch (error) {
+			console.error(error);
+			return false;
+		}
+	}
+
+	async update(): Promise<boolean> {
+		try {
+			const { data, error } = await supabase
+				.from("books")
+				.update(this.toJson())
+				.eq("id", this.id)
+				.single();
+
+			if (error) {
+				throw error;
+			}
+
+			return true;
+		} catch (error) {
+			console.error(error);
+			return false;
+		}
+	}
+
+	async delete(): Promise<boolean> {
+		try {
+			const { error } = await supabase.from("books").delete().eq("id", this.id);
+
+			if (error) {
+				throw error;
+			}
+
 			return true;
 		} catch (error) {
 			console.error(error);

@@ -9,6 +9,7 @@ import {
 import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
 import {
 	DragDropContext,
@@ -16,14 +17,13 @@ import {
 	Draggable,
 	DropResult,
 } from "react-beautiful-dnd";
+import { dashboardStore } from "../stores/DashboardStore";
 import BookDialog from "../components/AddBookDialog";
 import { Book } from "../models/Book";
 import { ContentTag } from "../models/ContentTag";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { useUserStore } from "../stores/UserStore";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { dashboardStore } from "../stores/DashboardStore";
-import { v4 as uuidv4 } from "uuid";
 
 const contenttagSchema = z.object({
 	name: z.string().min(1, "Title is required"),
@@ -37,15 +37,19 @@ interface BookWithPosition {
 	position: number;
 }
 
-const CoursesCreateScreen = () => {
+const SkillsCreateScreen: React.FC = () => {
 	const navigate = useNavigate();
 	const [selectedBooks, setSelectedBooks] = useState<BookWithPosition[]>([]);
-	const { books } = dashboardStore(({ books }) => ({ books }));
+	const { books } = dashboardStore((state) => ({
+		books: state.books,
+	}));
+
+	const { user } = useUserStore((state) => ({
+		user: state.user,
+	}));
+
 	const [creating, setCreating] = useState(false);
 	const [dialogOpen, setDialogOpen] = useState(false);
-	const [deleting, setDeleting] = useState(false);
-
-	const { user } = useUserStore(({ user }) => ({ user }));
 
 	const {
 		register,
@@ -57,17 +61,19 @@ const CoursesCreateScreen = () => {
 	});
 
 	const onSubmit: SubmitHandler<ContenttagFormValues> = async (data) => {
-		const newCourse = new ContentTag({
+		setCreating(true);
+		const newSkill = new ContentTag({
 			id: uuidv4(),
 			name: data.name,
 			description: data.description,
 			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString(),
-			type: "course",
+			type: "skill",
 			author_id: user!.id,
 			books: selectedBooks,
 		});
-		const result = await newCourse.create();
+		const result = await newSkill.create();
+		setCreating(false);
 		if (result) {
 			navigate(-1);
 		}
@@ -125,7 +131,7 @@ const CoursesCreateScreen = () => {
 						Back
 					</Button>
 					<Typography fontWeight={500} variant='h4'>
-						Create New Course
+						Create New Skill
 					</Typography>
 					<form onSubmit={handleSubmit(onSubmit)}>
 						<div
@@ -137,7 +143,7 @@ const CoursesCreateScreen = () => {
 							}}
 						>
 							<TextField
-								label='Course Name'
+								label='Skill Name'
 								variant='outlined'
 								{...register("name")}
 								error={!!errors.name}
@@ -156,7 +162,11 @@ const CoursesCreateScreen = () => {
 							/>
 							<div style={{ marginTop: "20px", alignSelf: "flex-end" }}>
 								<Button type='submit' variant='contained' color='primary'>
-									{creating ? "Creating" : "Create"}
+									{creating ? (
+										<Typography>Creating</Typography>
+									) : (
+										<Typography>Create</Typography>
+									)}
 								</Button>
 							</div>
 						</div>
@@ -229,4 +239,4 @@ const CoursesCreateScreen = () => {
 	);
 };
 
-export default CoursesCreateScreen;
+export default SkillsCreateScreen;

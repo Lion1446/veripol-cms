@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	Button,
 	FormControl,
@@ -8,14 +8,14 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Book } from "../models/Book";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../stores/UserStore";
+import { dashboardStore } from "../stores/DashboardStore";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Book } from "../models/Book";
 
 const bookSchema = z.object({
 	title: z.string().min(1, "Title is required"),
@@ -30,12 +30,16 @@ const bookSchema = z.object({
 
 type BookFormValues = z.infer<typeof bookSchema>;
 
-const BooksCreateScreen = () => {
+const BookDetailScreen = () => {
 	const navigate = useNavigate();
 	const { user } = useUserStore((state) => ({
 		user: state.user,
 	}));
-	const [creating, setCreating] = useState(false);
+	const { book } = dashboardStore((state) => ({
+		book: state.book,
+	}));
+	const [updating, setUpdating] = useState(false);
+	const [deleting, setDeleting] = useState(false);
 
 	const {
 		register,
@@ -44,28 +48,48 @@ const BooksCreateScreen = () => {
 		watch,
 	} = useForm<BookFormValues>({
 		resolver: zodResolver(bookSchema),
+		defaultValues: {
+			title: book?.title || "",
+			description: book?.description || "",
+			difficultyLevel: book?.difficultyLevel || 100,
+			status: book?.isPublished ? "Published" : "Unpublished",
+		},
 	});
 
-	const title = watch("title", "");
-	const description = watch("description", "");
+	const title = watch("title", book?.title || "");
+	const description = watch("description", book?.description || "");
 
-	const onSubmit: SubmitHandler<BookFormValues> = async (data) => {
-		setCreating(true);
-		const newBook = new Book({
-			id: uuidv4(),
+	const onSubmit = async (data: BookFormValues) => {
+		setUpdating(true);
+		const updatedBook = new Book({
+			id: book!.id,
 			title: data.title,
 			description: data.description,
 			difficultyLevel: data.difficultyLevel,
 			authorID: user?.id ?? "",
 			isPublished: data.status === "Published",
-			created_at: new Date().toISOString(),
+			created_at: book!.created_at,
 			updated_at: new Date().toISOString(),
 		});
-		const result = await newBook.create();
-		setCreating(false);
+		const result = await updatedBook.update();
+		setUpdating(false);
 		if (result) {
 			navigate(-1);
 		}
+	};
+
+	const handleDelete = async () => {
+		setDeleting(true);
+		const result = await new Book(book!).delete();
+		setDeleting(false);
+		if (result) {
+			navigate(-1);
+		}
+	};
+
+	const formControlStyles = {
+		flex: 1,
+		backgroundColor: "white",
 	};
 
 	return (
@@ -89,7 +113,7 @@ const BooksCreateScreen = () => {
 						Back
 					</Button>
 					<Typography fontWeight={500} variant='h4'>
-						Create New Book
+						About this Book
 					</Typography>
 					<form onSubmit={handleSubmit(onSubmit)}>
 						<div
@@ -106,7 +130,7 @@ const BooksCreateScreen = () => {
 								{...register("title")}
 								error={!!errors.title}
 								helperText={errors.title?.message}
-								style={{ flex: 1, backgroundColor: "white" }}
+								style={formControlStyles}
 							/>
 							<TextField
 								label='Book Description'
@@ -116,13 +140,19 @@ const BooksCreateScreen = () => {
 								{...register("description")}
 								error={!!errors.description}
 								helperText={errors.description?.message}
-								style={{ flex: 1, backgroundColor: "white" }}
+								style={formControlStyles}
 							/>
-							<div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
-								<FormControl style={{ flex: 1 }}>
+							<div
+								style={{
+									display: "flex",
+									gap: "20px",
+									marginTop: "20px",
+								}}
+							>
+								<FormControl style={formControlStyles}>
 									<InputLabel>Difficulty Level</InputLabel>
 									<Select
-										defaultValue=''
+										defaultValue={book?.difficultyLevel || ""}
 										variant='outlined'
 										{...register("difficultyLevel")}
 										error={!!errors.difficultyLevel}
@@ -133,10 +163,12 @@ const BooksCreateScreen = () => {
 										<MenuItem value={300}>300</MenuItem>
 									</Select>
 								</FormControl>
-								<FormControl style={{ flex: 1 }}>
+								<FormControl style={formControlStyles}>
 									<InputLabel>Status</InputLabel>
 									<Select
-										defaultValue=''
+										defaultValue={
+											book?.isPublished ? "Published" : "Unpublished"
+										}
 										variant='outlined'
 										{...register("status")}
 										error={!!errors.status}
@@ -147,12 +179,33 @@ const BooksCreateScreen = () => {
 									</Select>
 								</FormControl>
 							</div>
-							<div style={{ marginTop: "20px", alignSelf: "flex-end" }}>
-								<Button type='submit' variant='contained' color='primary'>
-									{creating ? (
-										<Typography>Creating</Typography>
+							<div
+								style={{
+									marginTop: "20px",
+									display: "flex",
+									justifyContent: "space-between",
+								}}
+							>
+								<Button
+									variant='contained'
+									sx={{
+										backgroundColor: "#cc0000",
+										color: "white",
+										"&:hover": { backgroundColor: "#a30000" },
+									}}
+									onClick={handleDelete}
+								>
+									{deleting ? (
+										<Typography>Deleting</Typography>
 									) : (
-										<Typography>Create</Typography>
+										<Typography>Delete</Typography>
+									)}
+								</Button>
+								<Button type='submit' variant='contained' color='primary'>
+									{updating ? (
+										<Typography>Updating</Typography>
+									) : (
+										<Typography>Update</Typography>
 									)}
 								</Button>
 							</div>
@@ -182,4 +235,4 @@ const BooksCreateScreen = () => {
 	);
 };
 
-export default BooksCreateScreen;
+export default BookDetailScreen;

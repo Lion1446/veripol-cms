@@ -1,7 +1,7 @@
 import { Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchBar from "../components/SearchBar";
-import { useState, ChangeEvent, useEffect, ReactElement } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { ContentTag } from "../models/ContentTag";
 import { getCoursesByAuthor } from "../services/courses";
 import { useUserStore } from "../stores/UserStore";
@@ -15,111 +15,107 @@ import { getJobRolesByAuthor } from "../services/jobRoles";
 import { getSkillsByAuthor } from "../services/skills";
 
 const CoursesScreen = () => {
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState<string>("");
+	const navigate = useNavigate();
+	const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const { user } = useUserStore((state) => ({
-    user: state.user,
-  }));
+	const { user } = useUserStore(({ user }) => ({ user }));
 
-  const {
-    setBooks,
-    books,
-    setCourses,
-    courses,
-    setLearningPath,
-    learningPaths,
-    setJobRoles,
-    jobRoles,
-    setSkills,
-    skills,
-  } = dashboardStore((state) => ({
-    setBooks: state.setBooks,
-    books: state.books,
-    setCourses: state.setCourses,
-    courses: state.courses,
-    setLearningPath: state.setLearningPath,
-    learningPaths: state.learningPath,
-    setJobRoles: state.setJobRoles,
-    jobRoles: state.jobRoles,
-    setSkills: state.setSkills,
-    skills: state.skills,
-  }));
+	const {
+		setBooks,
+		setCourses,
+		setLearningPaths,
+		setJobRoles,
+		setSkills,
+		courses,
+	} = dashboardStore(
+		({
+			setBooks,
+			setCourses,
+			setLearningPaths,
+			setJobRoles,
+			setSkills,
+			courses,
+		}) => ({
+			setBooks,
+			setCourses,
+			setLearningPaths,
+			setJobRoles,
+			setSkills,
+			courses,
+		})
+	);
 
-  const handleSearchOnChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
+	useEffect(() => {
+		const fetchData = async () => {
+			const authorID = user?.id;
+			if (!authorID) return;
+			const fetchedBooks = await getBooksByAuthor(authorID);
+			if (fetchedBooks) {
+				setBooks(fetchedBooks);
+			}
+			const fetchedCourses = await getCoursesByAuthor(authorID);
+			if (fetchedCourses) {
+				setCourses(fetchedCourses);
+			}
+			const fetchedLearningPaths = await getLearningPathsByAuthor(authorID);
+			if (fetchedLearningPaths) {
+				setLearningPaths(fetchedLearningPaths);
+			}
+			const fetchedJobRoles = await getJobRolesByAuthor(authorID);
+			if (fetchedJobRoles) {
+				setJobRoles(fetchedJobRoles);
+			}
+			const fetchedSkills = await getSkillsByAuthor(authorID);
+			if (fetchedSkills) {
+				setSkills(fetchedSkills);
+			}
+		};
+		if (user) {
+			fetchData();
+		}
+	}, [user]);
 
-  const filterCourses = (data: ContentTag[], searchTerm: string) => {
-    return data.filter((course) =>
-      course.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  };
+	const handleSearchOnChange = (event: ChangeEvent<HTMLInputElement>) => {
+		setSearchTerm(event.target.value);
+	};
 
-  const filteredCourses = searchTerm
-    ? filterCourses(courses ?? [], searchTerm)
-    : courses;
+	const filteredCourses = searchTerm
+		? courses?.filter((course) =>
+				course.name.toLowerCase().includes(searchTerm.toLowerCase())
+			)
+		: courses;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const authorID = user?.id ?? "";
-      const fetchedBooks = await getBooksByAuthor(authorID);
-      if (fetchedBooks) {
-        setBooks(fetchedBooks);
-      }
-      const fetchedCourses = await getCoursesByAuthor(authorID);
-      if (fetchedCourses) {
-        setCourses(fetchedCourses);
-      }
-      const fetchedLearningPaths = await getLearningPathsByAuthor(authorID);
-      if (fetchedLearningPaths) {
-        setLearningPath(fetchedLearningPaths);
-      }
-      const fetchedJobRoles = await getJobRolesByAuthor(authorID);
-      if (fetchedJobRoles) {
-        setJobRoles(fetchedJobRoles);
-      }
-      const fetchedSkills = await getSkillsByAuthor(authorID);
-      if (fetchedSkills) {
-        setSkills(fetchedSkills);
-      }
-    };
-    if (user) {
-      fetchData();
-    }
-  }, [user]);
-
-  return (
-    <div className="content-section">
-      <div
-        style={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          gap: "20px",
-          justifyContent: "center",
-          padding: "20px",
-        }}
-      >
-        <SearchBar
-          title="Search Course Name"
-          value={searchTerm}
-          onChange={handleSearchOnChange}
-        />
-        <Button
-          onClick={() => {
-            navigate("/dashboard/courses/create");
-          }}
-          size="large"
-          variant="contained"
-          startIcon={<AddIcon />}
-        >
-          Add New Course
-        </Button>
-      </div>
-      <DataTable data={filteredCourses ?? []} />
-    </div>
-  );
+	return (
+		<div className='content-section'>
+			<div
+				style={{
+					width: "100%",
+					display: "flex",
+					alignItems: "center",
+					gap: "20px",
+					justifyContent: "center",
+					padding: "20px",
+				}}
+			>
+				<SearchBar
+					title='Search Course Name'
+					value={searchTerm}
+					onChange={(event: ChangeEvent<HTMLInputElement>) =>
+						setSearchTerm(event.target.value)
+					}
+				/>
+				<Button
+					onClick={() => navigate("/dashboard/courses/create")}
+					size='large'
+					variant='contained'
+					startIcon={<AddIcon />}
+				>
+					Add New Course
+				</Button>
+			</div>
+			<DataTable type='course' data={filteredCourses ?? []} />
+		</div>
+	);
 };
 
 export default CoursesScreen;

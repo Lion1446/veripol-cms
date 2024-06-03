@@ -1,4 +1,3 @@
-import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -20,15 +19,16 @@ import ConstructionSharpIcon from "@mui/icons-material/ConstructionSharp";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../stores/UserStore";
+import { useState } from "react";
 
 const drawerWidth = 240;
 
 const SideDrawer = () => {
 	const navigate = useNavigate();
 	const logOut = useUserStore((state) => state.logOut);
-	const [mobileOpen, setMobileOpen] = React.useState(false);
-	const [isClosing, setIsClosing] = React.useState(false);
-	const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
+	const [mobileOpen, setMobileOpen] = useState(false);
+	const [isClosing, setIsClosing] = useState(false);
+	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
 	const handleDrawerClose = () => {
 		setIsClosing(true);

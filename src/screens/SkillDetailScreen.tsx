@@ -9,6 +9,7 @@ import {
 import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
 import {
 	DragDropContext,
@@ -20,13 +21,12 @@ import BookDialog from "../components/AddBookDialog";
 import { Book } from "../models/Book";
 import { ContentTag } from "../models/ContentTag";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import { dashboardStore } from "../stores/DashboardStore";
 import { useUserStore } from "../stores/UserStore";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { dashboardStore } from "../stores/DashboardStore";
-import { v4 as uuidv4 } from "uuid";
 
 const contenttagSchema = z.object({
-	name: z.string().min(1, "Title is required"),
+	name: z.string().min(1, "Name is required"),
 	description: z.string().min(1, "Description is required"),
 });
 
@@ -37,15 +37,24 @@ interface BookWithPosition {
 	position: number;
 }
 
-const CoursesCreateScreen = () => {
+const SkillDetailScreen: React.FC = () => {
 	const navigate = useNavigate();
-	const [selectedBooks, setSelectedBooks] = useState<BookWithPosition[]>([]);
-	const { books } = dashboardStore(({ books }) => ({ books }));
+	const { books, skill, contentTagBooks } = dashboardStore((state) => ({
+		books: state.books,
+		skill: state!.skill,
+		contentTagBooks: state.contentTagBooks,
+	}));
+	const [selectedBooks, setSelectedBooks] = useState<BookWithPosition[]>(
+		contentTagBooks!
+	);
+
+	const { user } = useUserStore((state) => ({
+		user: state.user,
+	}));
+
 	const [creating, setCreating] = useState(false);
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [deleting, setDeleting] = useState(false);
-
-	const { user } = useUserStore(({ user }) => ({ user }));
 
 	const {
 		register,
@@ -57,17 +66,19 @@ const CoursesCreateScreen = () => {
 	});
 
 	const onSubmit: SubmitHandler<ContenttagFormValues> = async (data) => {
-		const newCourse = new ContentTag({
-			id: uuidv4(),
+		setCreating(true);
+		const newSkill = new ContentTag({
+			id: skill!.id,
 			name: data.name,
 			description: data.description,
-			created_at: new Date().toISOString(),
+			created_at: skill!.created_at,
 			updated_at: new Date().toISOString(),
-			type: "course",
+			type: "skill",
 			author_id: user!.id,
 			books: selectedBooks,
 		});
-		const result = await newCourse.create();
+		const result = await newSkill.update();
+		setCreating(false);
 		if (result) {
 			navigate(-1);
 		}
@@ -104,6 +115,15 @@ const CoursesCreateScreen = () => {
 		);
 	};
 
+	const handleDelete = async () => {
+		setDeleting(true);
+		const result = await new ContentTag(skill!).delete();
+		setDeleting(false);
+		if (result) {
+			navigate(-1);
+		}
+	};
+
 	return (
 		<div className='content-section'>
 			<div style={{ display: "flex", width: "100%", height: "100%" }}>
@@ -125,7 +145,7 @@ const CoursesCreateScreen = () => {
 						Back
 					</Button>
 					<Typography fontWeight={500} variant='h4'>
-						Create New Course
+						About this Skill
 					</Typography>
 					<form onSubmit={handleSubmit(onSubmit)}>
 						<div
@@ -137,9 +157,10 @@ const CoursesCreateScreen = () => {
 							}}
 						>
 							<TextField
-								label='Course Name'
+								label='Skill Name'
 								variant='outlined'
 								{...register("name")}
+								defaultValue={skill!.name}
 								error={!!errors.name}
 								helperText={errors.name?.message}
 								style={{ flex: 1, backgroundColor: "white" }}
@@ -150,13 +171,39 @@ const CoursesCreateScreen = () => {
 								multiline
 								rows={15}
 								{...register("description")}
+								defaultValue={skill!.description}
 								error={!!errors.description}
 								helperText={errors.description?.message}
 								style={{ flex: 1, backgroundColor: "white" }}
 							/>
-							<div style={{ marginTop: "20px", alignSelf: "flex-end" }}>
+							<div
+								style={{
+									marginTop: "20px",
+									display: "flex",
+									justifyContent: "space-between",
+								}}
+							>
+								<Button
+									variant='contained'
+									sx={{
+										backgroundColor: "#cc0000",
+										color: "white",
+										"&:hover": { backgroundColor: "#a30000" },
+									}}
+									onClick={handleDelete}
+								>
+									{deleting ? (
+										<Typography>Deleting</Typography>
+									) : (
+										<Typography>Delete</Typography>
+									)}
+								</Button>
 								<Button type='submit' variant='contained' color='primary'>
-									{creating ? "Creating" : "Create"}
+									{creating ? (
+										<Typography>Updating</Typography>
+									) : (
+										<Typography>Update</Typography>
+									)}
 								</Button>
 							</div>
 						</div>
@@ -172,17 +219,14 @@ const CoursesCreateScreen = () => {
 						Add Book
 					</Button>
 					<DragDropContext onDragEnd={handleDragEnd}>
-						{selectedBooks.map((bookWithPosition, index) => (
-							<Droppable
-								key={bookWithPosition.book.id}
-								droppableId={bookWithPosition.book.id}
-							>
-								{(provided) => (
-									<div
-										ref={provided.innerRef}
-										{...provided.droppableProps}
-										style={{ marginTop: "20px" }}
-									>
+						<Droppable droppableId='books'>
+							{(provided) => (
+								<div
+									ref={provided.innerRef}
+									{...provided.droppableProps}
+									style={{ marginTop: "20px" }}
+								>
+									{selectedBooks.map((bookWithPosition, index) => (
 										<Draggable
 											key={bookWithPosition.book.id}
 											draggableId={bookWithPosition.book.id}
@@ -193,8 +237,12 @@ const CoursesCreateScreen = () => {
 													ref={provided.innerRef}
 													{...provided.draggableProps}
 													{...provided.dragHandleProps}
+													style={{
+														marginBottom: "10px",
+														...provided.draggableProps.style,
+													}}
 												>
-													<Card style={{ marginBottom: "10px" }}>
+													<Card>
 														<CardContent
 															style={{
 																display: "flex",
@@ -211,11 +259,11 @@ const CoursesCreateScreen = () => {
 												</div>
 											)}
 										</Draggable>
-										{provided.placeholder}
-									</div>
-								)}
-							</Droppable>
-						))}
+									))}
+									{provided.placeholder}
+								</div>
+							)}
+						</Droppable>
 					</DragDropContext>
 				</div>
 			</div>
@@ -229,4 +277,4 @@ const CoursesCreateScreen = () => {
 	);
 };
 
-export default CoursesCreateScreen;
+export default SkillDetailScreen;
