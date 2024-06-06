@@ -1,4 +1,4 @@
-import { supabase } from '../SupabaseClient';
+import { supabase } from '../supabaseClient';
 
 async function createUser(email, password) {
   try {

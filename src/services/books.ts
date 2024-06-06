@@ -1,4 +1,4 @@
-import { supabase } from '../SupabaseClient';
+import { supabase } from '../supabaseClient';
 import { Book } from '../models/Book';
 
 export async function getBooksByAuthor(authorID: string): Promise<Book[]> {

@@ -1,4 +1,4 @@
-import { supabase } from '../SupabaseClient';
+import { supabase } from '../supabaseClient';
 
 class BaseModel {
   constructor(data) {

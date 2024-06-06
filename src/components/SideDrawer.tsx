@@ -20,7 +20,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../stores/UserStore';
 import { useState } from 'react';
-import { supabase } from '../SupabaseClient';
+import { supabase } from '../supabaseClient';
 
 const drawerWidth = 240;
 

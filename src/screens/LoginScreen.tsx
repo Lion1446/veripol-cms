@@ -14,7 +14,7 @@ import { User } from '../models/User'; // Ensure the import path is correct
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../stores/UserStore';
-import { mapSupabaseUserToUser, supabase } from '../SupabaseClient';
+import { mapSupabaseUserToUser, supabase } from '../supabaseClient';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),

@@ -1,4 +1,4 @@
-import { supabase } from '../SupabaseClient';
+import { supabase } from '../supabaseClient';
 import { ContentTag } from '../models/ContentTag';
 
 export async function getSkillsByAuthor(

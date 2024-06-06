@@ -1,6 +1,6 @@
 import { BaseModel, IBaseModel } from './BaseModel';
 import { Unit } from './Unit';
-import { supabase } from '../SupabaseClient';
+import { supabase } from '../supabaseClient';
 
 interface IChapter extends IBaseModel {
   book_id: number;

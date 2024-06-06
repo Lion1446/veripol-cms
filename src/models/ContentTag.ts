@@ -1,6 +1,6 @@
 import { BaseModel, IBaseModel } from './BaseModel';
 import { Book } from './Book';
-import { supabase } from '../SupabaseClient';
+import { supabase } from '../supabaseClient';
 
 interface IContentTag extends IBaseModel {
   name: string;
