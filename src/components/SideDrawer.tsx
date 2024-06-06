@@ -20,6 +20,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../stores/UserStore';
 import { useState } from 'react';
+import { supabase } from '../SupabaseClient';
 
 const drawerWidth = 240;
 
@@ -69,8 +70,10 @@ const SideDrawer = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     logOut();
+
     navigate('/');
   };
 

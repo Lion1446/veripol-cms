@@ -69,11 +69,26 @@ const LoginScreen = () => {
   };
 
   useEffect(() => {
+    // Check for an existing session when the component mounts
+    const checkSession = async () => {
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
+      if (session) {
+        const supabaseUser = mapSupabaseUserToUser(session.user);
+        setUser(supabaseUser);
+        navigate('/dashboard/books');
+      }
+    };
+
+    checkSession();
+
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        const supabaseUser = mapSupabaseUserToUser(session?.user ?? null);
-        setUser(supabaseUser);
+        console.log(event);
         if (event === 'SIGNED_IN') {
+          const supabaseUser = mapSupabaseUserToUser(session?.user ?? null);
+          setUser(supabaseUser);
           navigate('/dashboard/books');
         }
       }
@@ -82,7 +97,7 @@ const LoginScreen = () => {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate, setUser]);
 
   return (
     <div
