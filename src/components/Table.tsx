@@ -1,6 +1,6 @@
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
-import { dashboardStore } from '../stores/DashboardStore';
+import { useDashboardStore } from '../stores/DashboardStore';
 import { ContentTag } from '../models/ContentTag';
 
 interface DataTableProps<T> {
@@ -16,7 +16,7 @@ const DataTable = <T extends object>({ data, type }: DataTableProps<T>) => {
     setLearnigPath,
     setJobRole,
     setSkill
-  } = dashboardStore((state) => ({
+  } = useDashboardStore((state) => ({
     setBook: state.setBook,
     setCourse: state.setCourse,
     setLearnigPath: state.setLearningPath,
@@ -24,77 +24,55 @@ const DataTable = <T extends object>({ data, type }: DataTableProps<T>) => {
     setSkill: state.setSkill,
     setContentTagBooks: state.setContentTagBooks
   }));
+
   const navigate = useNavigate();
+
   const handleRowClick = async (params: GridRowParams) => {
-    if (type == 'book') {
-      setBook(params.row);
-      navigate('/dashboard/books/book');
-    } else if (type == 'course') {
-      const courseObject = params.row;
-      setCourse(courseObject);
-      const contentTagInstance = new ContentTag({
-        id: courseObject.id,
-        name: courseObject.name,
-        type: courseObject.type,
-        description: courseObject.description,
-        author_id: courseObject.author_id,
-        books: [] // Add books if available
-      });
-      await contentTagInstance.getBooksById();
-      setContentTagBooks(contentTagInstance.books);
-      navigate('/dashboard/courses/course');
-    } else if (type == 'learning_path') {
-      const learningPathObject = params.row;
-      setLearnigPath(learningPathObject);
-      const contentTagInstance = new ContentTag({
-        id: learningPathObject.id,
-        name: learningPathObject.name,
-        type: learningPathObject.type,
-        description: learningPathObject.description,
-        author_id: learningPathObject.author_id,
-        books: [] // Add books if available
-      });
-      await contentTagInstance.getBooksById();
-      setContentTagBooks(contentTagInstance.books);
-      navigate('/dashboard/learning-paths/learning-path');
-    } else if (type == 'job_role') {
-      const jobRoleObject = params.row;
-      setJobRole(jobRoleObject);
-      const contentTagInstance = new ContentTag({
-        id: jobRoleObject.id,
-        name: jobRoleObject.name,
-        type: jobRoleObject.type,
-        description: jobRoleObject.description,
-        author_id: jobRoleObject.author_id,
-        books: [] // Add books if available
-      });
-      await contentTagInstance.getBooksById();
-      setContentTagBooks(contentTagInstance.books);
-      navigate('/dashboard/job-roles/job-role');
-    } else if (type == 'skill') {
-      const skillObject = params.row;
-      setSkill(skillObject);
-      const contentTagInstance = new ContentTag({
-        id: skillObject.id,
-        name: skillObject.name,
-        type: skillObject.type,
-        description: skillObject.description,
-        author_id: skillObject.author_id,
-        books: [] // Add books if available
-      });
-      await contentTagInstance.getBooksById();
-      setContentTagBooks(contentTagInstance.books);
-      navigate('/dashboard/skills/skill');
+    const { row } = params;
+    const contentTagInstance = new ContentTag({
+      id: row.id,
+      name: row.name,
+      type: row.type,
+      description: row.description,
+      author_id: row.author_id,
+      books: []
+    });
+
+    await contentTagInstance.getBooksById();
+    setContentTagBooks(contentTagInstance.books);
+
+    switch (type) {
+      case 'book':
+        setBook(row);
+        navigate('/dashboard/books/book');
+        break;
+      case 'course':
+        setCourse(row);
+        navigate('/dashboard/courses/course');
+        break;
+      case 'learning_path':
+        setLearnigPath(row);
+        navigate('/dashboard/learning-paths/learning-path');
+        break;
+      case 'job_role':
+        setJobRole(row);
+        navigate('/dashboard/job-roles/job-role');
+        break;
+      case 'skill':
+        setSkill(row);
+        navigate('/dashboard/skills/skill');
+        break;
+      default:
+        break;
     }
   };
 
-  // Filter out keys with undefined values
   const filteredData = data.map((row) =>
     Object.entries(row).reduce(
       (acc, [key, value]) => {
         if (
-          (value !== undefined && !Array.isArray(value)) ||
-          value.length > 0
+          value !== undefined &&
+          (!Array.isArray(value) || value.length > 0)
         ) {
           acc[key] = value;
         }
@@ -104,7 +82,6 @@ const DataTable = <T extends object>({ data, type }: DataTableProps<T>) => {
     )
   );
 
-  // Generate columns dynamically based on filtered keys in data
   const columns: GridColDef[] = Object.keys(filteredData[0] || {}).map(
     (key) => ({
       field: key,
@@ -114,7 +91,6 @@ const DataTable = <T extends object>({ data, type }: DataTableProps<T>) => {
     })
   );
 
-  // Create rows with an 'id' field required by DataGrid
   const rows = filteredData.map((row, index) => ({ id: index, ...row }));
 
   return (

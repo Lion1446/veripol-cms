@@ -1,5 +1,5 @@
 import { BaseModel, IBaseModel } from './BaseModel';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../SupabaseClient';
 import bcrypt from 'bcryptjs';
 
 export interface IUser extends IBaseModel {

@@ -8,7 +8,7 @@ import { useUserStore } from '../stores/UserStore';
 import './style.css';
 import DataTable from '../components/Table';
 import { useNavigate } from 'react-router-dom';
-import { dashboardStore } from '../stores/DashboardStore';
+import { useDashboardStore } from '../stores/DashboardStore';
 import { getBooksByAuthor } from '../services/books';
 
 const JobRolesScreen = () => {
@@ -28,7 +28,7 @@ const JobRolesScreen = () => {
     learningPaths,
     setSkills,
     skills
-  } = dashboardStore((state) => ({
+  } = useDashboardStore((state) => ({
     setBooks: state.setBooks,
     books: state.books,
     setJobRoles: state.setJobRoles,

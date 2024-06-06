@@ -22,7 +22,7 @@ import { ContentTag } from '../models/ContentTag';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { useUserStore } from '../stores/UserStore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { dashboardStore } from '../stores/DashboardStore';
+import { useDashboardStore } from '../stores/DashboardStore';
 import { v4 as uuidv4 } from 'uuid';
 
 const contenttagSchema = z.object({
@@ -40,7 +40,7 @@ interface BookWithPosition {
 const CoursesCreateScreen = () => {
   const navigate = useNavigate();
   const [selectedBooks, setSelectedBooks] = useState<BookWithPosition[]>([]);
-  const { books } = dashboardStore(({ books }) => ({ books }));
+  const { books } = useDashboardStore(({ books }) => ({ books }));
   const [creating, setCreating] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);

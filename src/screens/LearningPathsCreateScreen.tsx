@@ -17,7 +17,7 @@ import {
   Draggable,
   DropResult
 } from 'react-beautiful-dnd';
-import { dashboardStore } from '../stores/DashboardStore';
+import { useDashboardStore } from '../stores/DashboardStore';
 import BookDialog from '../components/AddBookDialog';
 import { Book } from '../models/Book';
 import { ContentTag } from '../models/ContentTag';
@@ -40,7 +40,7 @@ interface BookWithPosition {
 const LearningPathsCreateScreen: React.FC = () => {
   const navigate = useNavigate();
   const [selectedBooks, setSelectedBooks] = useState<BookWithPosition[]>([]);
-  const { books } = dashboardStore((state) => ({
+  const { books } = useDashboardStore((state) => ({
     books: state.books
   }));
 

@@ -3,7 +3,7 @@ import { User } from '../models/User';
 import { Book } from '../models/Book';
 import { ContentTag } from '../models/ContentTag';
 
-interface DashboardStore {
+interface useDashboardStore {
   user: User | null;
   books: Book[] | null;
   courses: ContentTag[] | null;
@@ -35,7 +35,7 @@ interface DashboardStore {
   ) => void;
 }
 
-export const dashboardStore = create<DashboardStore>((set) => ({
+export const useDashboardStore = create<useDashboardStore>((set) => ({
   user: null,
   books: null,
   courses: null,

@@ -1,5 +1,5 @@
 import { BaseModel, IBaseModel } from './BaseModel';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../SupabaseClient';
 
 interface IUnit extends IBaseModel {
   chapter_id: number;

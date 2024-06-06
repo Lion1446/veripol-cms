@@ -8,7 +8,7 @@ import { useUserStore } from '../stores/UserStore';
 import './style.css';
 import DataTable from '../components/Table';
 import { useNavigate } from 'react-router-dom';
-import { dashboardStore } from '../stores/DashboardStore';
+import { useDashboardStore } from '../stores/DashboardStore';
 import { getBooksByAuthor } from '../services/books';
 import { getLearningPathsByAuthor } from '../services/learningPaths';
 import { getJobRolesByAuthor } from '../services/jobRoles';
@@ -27,7 +27,7 @@ const CoursesScreen = () => {
     setJobRoles,
     setSkills,
     courses
-  } = dashboardStore(
+  } = useDashboardStore(
     ({
       setBooks,
       setCourses,

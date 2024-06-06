@@ -6,7 +6,7 @@ import { useState, ChangeEvent, useEffect, ReactElement } from 'react';
 import { Book } from '../models/Book';
 import { getBooksByAuthor } from '../services/books';
 import { useUserStore } from '../stores/UserStore';
-import { dashboardStore } from '../stores/DashboardStore';
+import { useDashboardStore } from '../stores/DashboardStore';
 import './style.css';
 import DataTable from '../components/Table';
 import { useNavigate } from 'react-router-dom';
@@ -30,7 +30,7 @@ const LibraryScreen = (): ReactElement => {
     setLearningPath,
     setJobRoles,
     setSkills
-  } = dashboardStore((state) => ({
+  } = useDashboardStore((state) => ({
     setBooks: state.setBooks,
     books: state.books,
     setCourses: state.setCourses,

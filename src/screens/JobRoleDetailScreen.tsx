@@ -20,7 +20,7 @@ import BookDialog from '../components/AddBookDialog';
 import { Book } from '../models/Book';
 import { ContentTag } from '../models/ContentTag';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import { dashboardStore } from '../stores/DashboardStore';
+import { useDashboardStore } from '../stores/DashboardStore';
 import { useUserStore } from '../stores/UserStore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -38,7 +38,7 @@ interface BookWithPosition {
 
 const JobRoleDetailScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { books, JobRole, contentTagBooks } = dashboardStore((state) => ({
+  const { books, JobRole, contentTagBooks } = useDashboardStore((state) => ({
     books: state.books,
     JobRole: state.jobRole,
     contentTagBooks: state.contentTagBooks

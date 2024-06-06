@@ -11,9 +11,10 @@ import {
   Checkbox
 } from '@mui/material';
 import { User } from '../models/User'; // Ensure the import path is correct
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../stores/UserStore';
+import { mapSupabaseUserToUser, supabase } from '../SupabaseClient';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
@@ -66,6 +67,22 @@ const LoginScreen = () => {
   const handleShowPasswordChange = () => {
     setShowPassword(!showPassword);
   };
+
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        const supabaseUser = mapSupabaseUserToUser(session?.user ?? null);
+        setUser(supabaseUser);
+        if (event === 'SIGNED_IN') {
+          navigate('/dashboard/books');
+        }
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <div

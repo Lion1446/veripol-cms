@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../stores/UserStore';
-import { dashboardStore } from '../stores/DashboardStore';
+import { useDashboardStore } from '../stores/DashboardStore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Book } from '../models/Book';
 
@@ -35,7 +35,7 @@ const BookDetailScreen = () => {
   const { user } = useUserStore((state) => ({
     user: state.user
   }));
-  const { book } = dashboardStore((state) => ({
+  const { book } = useDashboardStore((state) => ({
     book: state.book
   }));
   const [updating, setUpdating] = useState(false);

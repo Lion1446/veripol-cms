@@ -1,5 +1,5 @@
 import { BaseModel, IBaseModel } from './BaseModel';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../SupabaseClient';
 
 interface IBook extends IBaseModel {
   title: string;

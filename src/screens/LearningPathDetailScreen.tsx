@@ -20,7 +20,7 @@ import BookDialog from '../components/AddBookDialog';
 import { Book } from '../models/Book';
 import { ContentTag } from '../models/ContentTag';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import { dashboardStore } from '../stores/DashboardStore';
+import { useDashboardStore } from '../stores/DashboardStore';
 import { useUserStore } from '../stores/UserStore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -38,11 +38,13 @@ interface BookWithPosition {
 
 const LearningPathDetailScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { books, learningPath, contentTagBooks } = dashboardStore((state) => ({
-    books: state.books,
-    learningPath: state.learningPath,
-    contentTagBooks: state.contentTagBooks
-  }));
+  const { books, learningPath, contentTagBooks } = useDashboardStore(
+    (state) => ({
+      books: state.books,
+      learningPath: state.learningPath,
+      contentTagBooks: state.contentTagBooks
+    })
+  );
   const [selectedBooks, setSelectedBooks] = useState<BookWithPosition[]>(
     contentTagBooks!
   );

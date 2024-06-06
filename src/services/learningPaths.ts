@@ -1,4 +1,4 @@
-import { supabase } from '../supabaseClient';
+import { supabase } from '../SupabaseClient';
 import { ContentTag } from '../models/ContentTag';
 
 export async function getLearningPathsByAuthor(
