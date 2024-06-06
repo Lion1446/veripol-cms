@@ -17,13 +17,14 @@ import {
   Draggable,
   DropResult
 } from 'react-beautiful-dnd';
-import { useDashboardStore } from '../stores/DashboardStore';
 import BookDialog from '../components/AddBookDialog';
 import { Book } from '../models/Book';
 import { ContentTag } from '../models/ContentTag';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { useUserStore } from '../stores/UserStore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useDashboardStore } from '../stores/DashboardStore';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const contenttagSchema = z.object({
   name: z.string().min(1, 'Title is required'),
@@ -39,32 +40,34 @@ interface BookWithPosition {
 
 const JobRolesCreateScreen: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedBooks, setSelectedBooks] = useState<BookWithPosition[]>([]);
-  const { books } = useDashboardStore((state) => ({
-    books: state.books
-  }));
-
-  const { user } = useUserStore((state) => ({
-    user: state.user
-  }));
-
-  const [creating, setCreating] = useState(false);
+  const { books } = useDashboardStore(({ books }) => ({ books }));
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const { user } = useUserStore(({ user }) => ({ user }));
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    watch
+    formState: { errors }
   } = useForm<ContenttagFormValues>({
     resolver: zodResolver(contenttagSchema)
   });
 
-  const name = watch('name', '');
-  const description = watch('description', '');
+  const createJobRole = async (newJobRole: ContentTag) => {
+    return newJobRole.create();
+  };
+
+  const mutation = useMutation({
+    mutationFn: createJobRole,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['jobRoles'] });
+      navigate(-1);
+    }
+  });
 
   const onSubmit: SubmitHandler<ContenttagFormValues> = async (data) => {
-    setCreating(true);
     const newJobRole = new ContentTag({
       id: uuidv4(),
       name: data.name,
@@ -75,11 +78,7 @@ const JobRolesCreateScreen: React.FC = () => {
       author_id: user!.id,
       books: selectedBooks
     });
-    const result = await newJobRole.create();
-    setCreating(false);
-    if (result) {
-      navigate(-1);
-    }
+    mutation.mutate(newJobRole); // Trigger the mutation
   };
 
   const handleAddBook = () => {
@@ -146,7 +145,7 @@ const JobRolesCreateScreen: React.FC = () => {
               }}
             >
               <TextField
-                label="JobRole Name"
+                label="Job Role Name"
                 variant="outlined"
                 {...register('name')}
                 error={!!errors.name}
@@ -165,11 +164,7 @@ const JobRolesCreateScreen: React.FC = () => {
               />
               <div style={{ marginTop: '20px', alignSelf: 'flex-end' }}>
                 <Button type="submit" variant="contained" color="primary">
-                  {creating ? (
-                    <Typography>Creating</Typography>
-                  ) : (
-                    <Typography>Create</Typography>
-                  )}
+                  {mutation.isPending ? 'Creating' : 'Create'}
                 </Button>
               </div>
             </div>
@@ -180,7 +175,7 @@ const JobRolesCreateScreen: React.FC = () => {
             onClick={handleAddBook}
             variant="contained"
             color="primary"
-            style={{ width: '100%' }}
+            style={{ width: '100%', marginTop: '20px' }}
           >
             Add Book
           </Button>

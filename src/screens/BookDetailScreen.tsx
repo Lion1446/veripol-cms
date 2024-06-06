@@ -16,6 +16,7 @@ import { useUserStore } from '../stores/UserStore';
 import { useDashboardStore } from '../stores/DashboardStore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Book } from '../models/Book';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const bookSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -31,6 +32,7 @@ const bookSchema = z.object({
 type BookFormValues = z.infer<typeof bookSchema>;
 
 const BookDetailScreen = () => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { user } = useUserStore((state) => ({
     user: state.user
@@ -59,6 +61,18 @@ const BookDetailScreen = () => {
   const title = watch('title', book?.title || '');
   const description = watch('description', book?.description || '');
 
+  const deleteBook = async () => {
+    return new Book(book!).delete();
+  };
+
+  const mutation = useMutation({
+    mutationFn: deleteBook,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      navigate(-1);
+    }
+  });
+
   const onSubmit = async (data: BookFormValues) => {
     setUpdating(true);
     const updatedBook = new Book({
@@ -80,11 +94,8 @@ const BookDetailScreen = () => {
 
   const handleDelete = async () => {
     setDeleting(true);
-    const result = await new Book(book!).delete();
+    mutation.mutate();
     setDeleting(false);
-    if (result) {
-      navigate(-1);
-    }
   };
 
   const formControlStyles = {

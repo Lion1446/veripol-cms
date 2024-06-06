@@ -1,43 +1,18 @@
 import { Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SearchBar from '../components/SearchBar';
-import { useState, ChangeEvent, useEffect, ReactElement } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { ContentTag } from '../models/ContentTag';
-import { getJobRolesByAuthor } from '../services/jobRoles';
-import { useUserStore } from '../stores/UserStore';
 import './style.css';
 import DataTable from '../components/Table';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardStore } from '../stores/DashboardStore';
-import { getBooksByAuthor } from '../services/books';
 
 const JobRolesScreen = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const { user } = useUserStore((state) => ({
-    user: state.user
-  }));
-
-  const {
-    setBooks,
-    books,
-    setJobRoles,
-    jobRoles,
-    setLearningPath,
-    learningPaths,
-    setSkills,
-    skills
-  } = useDashboardStore((state) => ({
-    setBooks: state.setBooks,
-    books: state.books,
-    setJobRoles: state.setJobRoles,
-    jobRoles: state.jobRoles,
-    setLearningPath: state.setLearningPaths,
-    learningPaths: state.learningPaths,
-    setSkills: state.setSkills,
-    skills: state.skills
-  }));
+  const { jobRoles } = useDashboardStore(({ jobRoles }) => ({ jobRoles }));
 
   const handleSearchOnChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -52,23 +27,6 @@ const JobRolesScreen = () => {
   const filteredJobRoles = searchTerm
     ? filterJobRoles(jobRoles ?? [], searchTerm)
     : jobRoles;
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const authorID = user?.id ?? '';
-      const fetchedBooks = await getBooksByAuthor(authorID);
-      if (fetchedBooks) {
-        setBooks(fetchedBooks);
-      }
-      const fetchedJobRoles = await getJobRolesByAuthor(authorID);
-      if (fetchedJobRoles) {
-        setJobRoles(fetchedJobRoles);
-      }
-    };
-    if (user) {
-      fetchData();
-    }
-  }, [user]);
 
   return (
     <div className="content-section">

@@ -17,13 +17,14 @@ import {
   Draggable,
   DropResult
 } from 'react-beautiful-dnd';
-import { useDashboardStore } from '../stores/DashboardStore';
 import BookDialog from '../components/AddBookDialog';
 import { Book } from '../models/Book';
 import { ContentTag } from '../models/ContentTag';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { useUserStore } from '../stores/UserStore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useDashboardStore } from '../stores/DashboardStore';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const contenttagSchema = z.object({
   name: z.string().min(1, 'Title is required'),
@@ -39,6 +40,7 @@ interface BookWithPosition {
 
 const LearningPathsCreateScreen: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedBooks, setSelectedBooks] = useState<BookWithPosition[]>([]);
   const { books } = useDashboardStore((state) => ({
     books: state.books
@@ -54,10 +56,21 @@ const LearningPathsCreateScreen: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    watch
+    formState: { errors }
   } = useForm<ContenttagFormValues>({
     resolver: zodResolver(contenttagSchema)
+  });
+
+  const createLearningPath = async (newLearningPath: ContentTag) => {
+    return newLearningPath.create();
+  };
+
+  const mutation = useMutation({
+    mutationFn: createLearningPath,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['learningPaths'] });
+      navigate(-1);
+    }
   });
 
   const onSubmit: SubmitHandler<ContenttagFormValues> = async (data) => {
@@ -72,11 +85,7 @@ const LearningPathsCreateScreen: React.FC = () => {
       author_id: user!.id,
       books: selectedBooks
     });
-    const result = await newLearningPath.create();
-    setCreating(false);
-    if (result) {
-      navigate(-1);
-    }
+    mutation.mutate(newLearningPath);
   };
 
   const handleAddBook = () => {
@@ -177,7 +186,7 @@ const LearningPathsCreateScreen: React.FC = () => {
             onClick={handleAddBook}
             variant="contained"
             color="primary"
-            style={{ width: '100%' }}
+            style={{ width: '100%', marginTop: '20px' }}
           >
             Add Book
           </Button>

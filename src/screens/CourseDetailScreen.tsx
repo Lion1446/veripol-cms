@@ -23,6 +23,7 @@ import { useDashboardStore } from '../stores/DashboardStore';
 import { useUserStore } from '../stores/UserStore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Book } from '../models/Book';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const contenttagSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -37,6 +38,7 @@ interface BookWithPosition {
 }
 
 const CourseDetailScreen: React.FC = () => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { books, course, contentTagBooks } = useDashboardStore(
     ({ books, course, contentTagBooks }) => ({
@@ -64,6 +66,18 @@ const CourseDetailScreen: React.FC = () => {
     defaultValues: {
       name: course?.name || '',
       description: course?.description || ''
+    }
+  });
+
+  const deleteCourse = async () => {
+    return new ContentTag(course!).delete();
+  };
+
+  const mutation = useMutation({
+    mutationFn: deleteCourse,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      navigate(-1);
     }
   });
 
@@ -116,10 +130,7 @@ const CourseDetailScreen: React.FC = () => {
   };
 
   const handleDelete = async () => {
-    const result = await new ContentTag(course!).delete();
-    if (result) {
-      navigate(-1);
-    }
+    mutation.mutate();
   };
 
   return (

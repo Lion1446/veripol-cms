@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../stores/UserStore';
 import { useState } from 'react';
 import { supabase } from '../supabaseClient';
+import { Button } from '@mui/material';
 
 const drawerWidth = 240;
 
@@ -80,70 +81,77 @@ const SideDrawer = () => {
   const drawer = (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Toolbar />
-      <List>
-        {['Library', 'Courses', 'Learning Paths', 'Job Roles', 'Skills'].map(
-          (text, index) => (
-            <ListItem
-              key={text}
-              style={{
-                backgroundColor:
-                  index === selectedTabIndex ? '#1876D2' : 'transparent',
-                color: index === selectedTabIndex ? 'white' : 'black'
-              }}
-            >
-              <ListItemButton
-                onClick={() => {
-                  handleNavigate(index);
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          justifyContent: 'space-between'
+        }}
+      >
+        <List>
+          {['Library', 'Courses', 'Learning Paths', 'Job Roles', 'Skills'].map(
+            (text, index) => (
+              <ListItem
+                key={text}
+                style={{
+                  backgroundColor:
+                    index === selectedTabIndex ? '#1876D2' : 'transparent',
+                  color: index === selectedTabIndex ? 'white' : 'black'
                 }}
               >
-                <ListItemIcon>
-                  {index === 0 ? (
-                    <LibraryBooksSharpIcon
-                      style={{
-                        color: index === selectedTabIndex ? 'white' : 'black'
-                      }}
-                    />
-                  ) : index === 1 ? (
-                    <LocalLibrarySharpIcon
-                      style={{
-                        color: index === selectedTabIndex ? 'white' : 'black'
-                      }}
-                    />
-                  ) : index === 2 ? (
-                    <AltRouteSharpIcon
-                      style={{
-                        color: index === selectedTabIndex ? 'white' : 'black'
-                      }}
-                    />
-                  ) : index === 3 ? (
-                    <WorkSharpIcon
-                      style={{
-                        color: index === selectedTabIndex ? 'white' : 'black'
-                      }}
-                    />
-                  ) : (
-                    <ConstructionSharpIcon
-                      style={{
-                        color: index === selectedTabIndex ? 'white' : 'black'
-                      }}
-                    />
-                  )}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          )
-        )}
-      </List>
-      <Box sx={{ flexGrow: 1 }} />
-      <List>
-        <ListItem button onClick={handleLogout}>
-          <ListItemIcon>
-            <ExitToAppIcon />
-          </ListItemIcon>
-          <ListItemText primary="Log out" />
-        </ListItem>
-      </List>
+                <ListItemButton
+                  onClick={() => {
+                    handleNavigate(index);
+                  }}
+                >
+                  <ListItemIcon>
+                    {index === 0 ? (
+                      <LibraryBooksSharpIcon
+                        style={{
+                          color: index === selectedTabIndex ? 'white' : 'black'
+                        }}
+                      />
+                    ) : index === 1 ? (
+                      <LocalLibrarySharpIcon
+                        style={{
+                          color: index === selectedTabIndex ? 'white' : 'black'
+                        }}
+                      />
+                    ) : index === 2 ? (
+                      <AltRouteSharpIcon
+                        style={{
+                          color: index === selectedTabIndex ? 'white' : 'black'
+                        }}
+                      />
+                    ) : index === 3 ? (
+                      <WorkSharpIcon
+                        style={{
+                          color: index === selectedTabIndex ? 'white' : 'black'
+                        }}
+                      />
+                    ) : (
+                      <ConstructionSharpIcon
+                        style={{
+                          color: index === selectedTabIndex ? 'white' : 'black'
+                        }}
+                      />
+                    )}
+                  </ListItemIcon>
+                  <ListItemText primary={text} />
+                </ListItemButton>
+              </ListItem>
+            )
+          )}
+        </List>
+        <Button
+          variant="outlined"
+          style={{ margin: '50px 10px' }}
+          onClick={handleLogout}
+        >
+          LOGOUT
+        </Button>
+      </div>
     </div>
   );
 

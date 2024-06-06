@@ -24,6 +24,7 @@ import { useUserStore } from '../stores/UserStore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDashboardStore } from '../stores/DashboardStore';
 import { v4 as uuidv4 } from 'uuid';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const contenttagSchema = z.object({
   name: z.string().min(1, 'Title is required'),
@@ -39,21 +40,31 @@ interface BookWithPosition {
 
 const CoursesCreateScreen = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedBooks, setSelectedBooks] = useState<BookWithPosition[]>([]);
   const { books } = useDashboardStore(({ books }) => ({ books }));
-  const [creating, setCreating] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   const { user } = useUserStore(({ user }) => ({ user }));
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    watch
+    formState: { errors }
   } = useForm<ContenttagFormValues>({
     resolver: zodResolver(contenttagSchema)
+  });
+
+  const createCourse = async (newCourse: ContentTag) => {
+    return newCourse.create();
+  };
+
+  const mutation = useMutation({
+    mutationFn: createCourse,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      navigate(-1);
+    }
   });
 
   const onSubmit: SubmitHandler<ContenttagFormValues> = async (data) => {
@@ -67,10 +78,7 @@ const CoursesCreateScreen = () => {
       author_id: user!.id,
       books: selectedBooks
     });
-    const result = await newCourse.create();
-    if (result) {
-      navigate(-1);
-    }
+    mutation.mutate(newCourse); // Trigger the mutation
   };
 
   const handleAddBook = () => {
@@ -156,7 +164,7 @@ const CoursesCreateScreen = () => {
               />
               <div style={{ marginTop: '20px', alignSelf: 'flex-end' }}>
                 <Button type="submit" variant="contained" color="primary">
-                  {creating ? 'Creating' : 'Create'}
+                  {mutation.isPending ? 'Creating' : 'Create'}
                 </Button>
               </div>
             </div>

@@ -1,76 +1,24 @@
-// LibraryScreen.tsx
 import { Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SearchBar from '../components/SearchBar';
-import { useState, ChangeEvent, useEffect, ReactElement } from 'react';
+import { useState, ChangeEvent, ReactElement } from 'react';
 import { Book } from '../models/Book';
-import { getBooksByAuthor } from '../services/books';
-import { useUserStore } from '../stores/UserStore';
 import { useDashboardStore } from '../stores/DashboardStore';
 import './style.css';
 import DataTable from '../components/Table';
 import { useNavigate } from 'react-router-dom';
-import { getCoursesByAuthor } from '../services/courses';
-import { getLearningPathsByAuthor } from '../services/learningPaths';
-import { getJobRolesByAuthor } from '../services/jobRoles';
-import { getSkillsByAuthor } from '../services/skills';
 
 const LibraryScreen = (): ReactElement => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const { user } = useUserStore((state) => ({
-    user: state.user
-  }));
-
-  const {
-    setBooks,
-    books,
-    setCourses,
-    setLearningPath,
-    setJobRoles,
-    setSkills
-  } = useDashboardStore((state) => ({
-    setBooks: state.setBooks,
-    books: state.books,
-    setCourses: state.setCourses,
-    setLearningPath: state.setLearningPaths,
-    setJobRoles: state.setJobRoles,
-    setSkills: state.setSkills
+  const { books } = useDashboardStore((state) => ({
+    books: state.books
   }));
 
   const handleSearchOnChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const authorID = user?.id ?? '';
-      const fetchedBooks = await getBooksByAuthor(authorID);
-      if (fetchedBooks) {
-        setBooks(fetchedBooks);
-      }
-      const fetchedCourses = await getCoursesByAuthor(authorID);
-      if (fetchedCourses) {
-        setCourses(fetchedCourses);
-      }
-      const fetchedLearningPaths = await getLearningPathsByAuthor(authorID);
-      if (fetchedLearningPaths) {
-        setLearningPath(fetchedLearningPaths);
-      }
-      const fetchedJobRoles = await getJobRolesByAuthor(authorID);
-      if (fetchedJobRoles) {
-        setJobRoles(fetchedJobRoles);
-      }
-      const fetchedSkills = await getSkillsByAuthor(authorID);
-      if (fetchedSkills) {
-        setSkills(fetchedSkills);
-      }
-    };
-    if (user) {
-      fetchData();
-    }
-  }, [user]);
 
   const filterBooks = (data: Book[], searchTerm: string) => {
     return data.filter((book) =>

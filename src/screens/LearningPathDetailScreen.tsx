@@ -23,6 +23,7 @@ import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { useDashboardStore } from '../stores/DashboardStore';
 import { useUserStore } from '../stores/UserStore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const contenttagSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -37,6 +38,7 @@ interface BookWithPosition {
 }
 
 const LearningPathDetailScreen: React.FC = () => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { books, learningPath, contentTagBooks } = useDashboardStore(
     (state) => ({
@@ -64,6 +66,18 @@ const LearningPathDetailScreen: React.FC = () => {
     watch
   } = useForm<ContenttagFormValues>({
     resolver: zodResolver(contenttagSchema)
+  });
+
+  const deleteLearningPath = async () => {
+    return new ContentTag(learningPath!).delete();
+  };
+
+  const mutation = useMutation({
+    mutationFn: deleteLearningPath,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['learningPaths'] });
+      navigate(-1);
+    }
   });
 
   const onSubmit: SubmitHandler<ContenttagFormValues> = async (data) => {
@@ -118,11 +132,8 @@ const LearningPathDetailScreen: React.FC = () => {
 
   const handleDelete = async () => {
     setDeleting(true);
-    const result = await new ContentTag(learningPath!).delete();
+    mutation.mutate();
     setDeleting(false);
-    if (result) {
-      navigate(-1);
-    }
   };
 
   return (

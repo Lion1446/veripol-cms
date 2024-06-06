@@ -17,13 +17,14 @@ import {
   Draggable,
   DropResult
 } from 'react-beautiful-dnd';
-import { useDashboardStore } from '../stores/DashboardStore';
 import BookDialog from '../components/AddBookDialog';
 import { Book } from '../models/Book';
 import { ContentTag } from '../models/ContentTag';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import { useUserStore } from '../stores/UserStore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useUserStore } from '../stores/UserStore';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useDashboardStore } from '../stores/DashboardStore';
 
 const contenttagSchema = z.object({
   name: z.string().min(1, 'Title is required'),
@@ -39,6 +40,7 @@ interface BookWithPosition {
 
 const SkillsCreateScreen: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedBooks, setSelectedBooks] = useState<BookWithPosition[]>([]);
   const { books } = useDashboardStore((state) => ({
     books: state.books
@@ -72,12 +74,20 @@ const SkillsCreateScreen: React.FC = () => {
       author_id: user!.id,
       books: selectedBooks
     });
-    const result = await newSkill.create();
-    setCreating(false);
-    if (result) {
+    mutation.mutate(newSkill);
+  };
+
+  const createSkill = async (newSkill: ContentTag) => {
+    return newSkill.create();
+  };
+
+  const mutation = useMutation({
+    mutationFn: createSkill,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['skills'] });
       navigate(-1);
     }
-  };
+  });
 
   const handleAddBook = () => {
     setDialogOpen(true);

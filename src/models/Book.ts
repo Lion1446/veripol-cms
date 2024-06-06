@@ -1,5 +1,6 @@
 import { BaseModel, IBaseModel } from './BaseModel';
 import { supabase } from '../supabaseClient';
+import { gridColumnsTotalWidthSelector } from '@mui/x-data-grid';
 
 interface IBook extends IBaseModel {
   title: string;
@@ -89,14 +90,11 @@ export class Book extends BaseModel implements IBook {
   async delete(): Promise<boolean> {
     try {
       const { error } = await supabase.from('books').delete().eq('id', this.id);
-
       if (error) {
         throw error;
       }
-
       return true;
     } catch (error) {
-      console.error(error);
       return false;
     }
   }

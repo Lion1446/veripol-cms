@@ -23,6 +23,7 @@ import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { useDashboardStore } from '../stores/DashboardStore';
 import { useUserStore } from '../stores/UserStore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const contenttagSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -37,6 +38,7 @@ interface BookWithPosition {
 }
 
 const JobRoleDetailScreen: React.FC = () => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { books, JobRole, contentTagBooks } = useDashboardStore((state) => ({
     books: state.books,
@@ -62,6 +64,18 @@ const JobRoleDetailScreen: React.FC = () => {
     watch
   } = useForm<ContenttagFormValues>({
     resolver: zodResolver(contenttagSchema)
+  });
+
+  const deleteJobRole = async () => {
+    return new ContentTag(JobRole!).delete();
+  };
+
+  const mutation = useMutation({
+    mutationFn: deleteJobRole,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['jobRoles'] });
+      navigate(-1);
+    }
   });
 
   const onSubmit: SubmitHandler<ContenttagFormValues> = async (data) => {
@@ -116,11 +130,8 @@ const JobRoleDetailScreen: React.FC = () => {
 
   const handleDelete = async () => {
     setDeleting(true);
-    const result = await new ContentTag(JobRole!).delete();
+    mutation.mutate();
     setDeleting(false);
-    if (result) {
-      navigate(-1);
-    }
   };
 
   return (

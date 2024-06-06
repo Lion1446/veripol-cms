@@ -10,12 +10,13 @@ import {
 } from '@mui/material';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
-import { Book } from '../models/Book';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { v4 as uuidv4 } from 'uuid';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../stores/UserStore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Book } from '../models/Book'; // Make sure this is your API service for book creation
 
 const bookSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -31,11 +32,11 @@ const bookSchema = z.object({
 type BookFormValues = z.infer<typeof bookSchema>;
 
 const BooksCreateScreen = () => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { user } = useUserStore((state) => ({
     user: state.user
   }));
-  const [creating, setCreating] = useState(false);
 
   const {
     register,
@@ -49,8 +50,19 @@ const BooksCreateScreen = () => {
   const title = watch('title', '');
   const description = watch('description', '');
 
+  const createBook = async (newBook: Book) => {
+    return newBook.create();
+  };
+
+  const mutation = useMutation({
+    mutationFn: createBook,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      navigate(-1);
+    }
+  });
+
   const onSubmit: SubmitHandler<BookFormValues> = async (data) => {
-    setCreating(true);
     const newBook = new Book({
       id: uuidv4(),
       title: data.title,
@@ -61,11 +73,7 @@ const BooksCreateScreen = () => {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     });
-    const result = await newBook.create();
-    setCreating(false);
-    if (result) {
-      navigate(-1);
-    }
+    mutation.mutate(newBook); // Trigger the mutation
   };
 
   return (
@@ -149,7 +157,7 @@ const BooksCreateScreen = () => {
               </div>
               <div style={{ marginTop: '20px', alignSelf: 'flex-end' }}>
                 <Button type="submit" variant="contained" color="primary">
-                  {creating ? (
+                  {mutation.isPending ? (
                     <Typography>Creating</Typography>
                   ) : (
                     <Typography>Create</Typography>

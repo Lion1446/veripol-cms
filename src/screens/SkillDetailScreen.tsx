@@ -24,6 +24,7 @@ import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { useDashboardStore } from '../stores/DashboardStore';
 import { useUserStore } from '../stores/UserStore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const contenttagSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -38,6 +39,7 @@ interface BookWithPosition {
 }
 
 const SkillDetailScreen: React.FC = () => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { books, skill, contentTagBooks } = useDashboardStore((state) => ({
     books: state.books,
@@ -63,6 +65,18 @@ const SkillDetailScreen: React.FC = () => {
     watch
   } = useForm<ContenttagFormValues>({
     resolver: zodResolver(contenttagSchema)
+  });
+
+  const deleteSkill = async () => {
+    return new ContentTag(skill!).delete();
+  };
+
+  const mutation = useMutation({
+    mutationFn: deleteSkill,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['skills'] });
+      navigate(-1);
+    }
   });
 
   const onSubmit: SubmitHandler<ContenttagFormValues> = async (data) => {
@@ -117,11 +131,8 @@ const SkillDetailScreen: React.FC = () => {
 
   const handleDelete = async () => {
     setDeleting(true);
-    const result = await new ContentTag(skill!).delete();
+    mutation.mutate();
     setDeleting(false);
-    if (result) {
-      navigate(-1);
-    }
   };
 
   return (
